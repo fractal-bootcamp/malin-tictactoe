@@ -23,7 +23,7 @@ const CreateBoard = () => {
       <div className='container m-auto grid grid-cols-3 grid-rows-3 gap-0'>
         {game.cells.map((cell, index) => {
           return (
-            <div className='border-2 border-stone-200'>
+            <div className='border-2 border-stone-200 p-10'>
               {cell}
             </div>
           )
