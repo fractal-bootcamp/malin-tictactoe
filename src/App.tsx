@@ -32,19 +32,27 @@ const CreateBoard = () => {
 
   return (
     <div>
-      <div className='text-2xl'>{`Player ${game.currentPlayer}'s turn:`}</div>
-      <div className='container m-auto grid grid-cols-3 grid-rows-3 gap-0'>
+      <div className='text-xl mb-10'>It's Your Turn:
+        <span className='ml-2 inline-flex items-center rounded-md bg-yellow-50 px-3 pb-1 text-2xl font-medium text-yellow-800 ring-2 ring-inset ring-yellow-600/20'>
+          {`${game.currentPlayer}`}
+        </span>
+      </div>
+      <div className='container mx-auto grid grid-cols-3 grid-rows-3 gap-2 w-64 h-64'>
         {game.cells.map((cell, index) => {
           return (
             <div
-              className='border-2 border-stone-200 p-10'
-              onClick={handleOnClick(index as CellIndex)}>
+              key={index}
+              className='bg-gray-200 flex items-center justify-center text-4xl font-bold cursor-pointer hover:bg-gray-300 transition-colors duration-200 rounded-lg'
+              onClick={handleOnClick(index as CellIndex)}
+            >
               {cell}
             </div>
           )
         })}
       </div>
-      <GameEndFooter gameEndDeclaration={gameEndDeclaration} />
+      <div className='mt-4'>
+        <GameEndFooter gameEndDeclaration={gameEndDeclaration} />
+      </div>
     </div >
   )
 }
@@ -53,15 +61,20 @@ const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration }) => {
   const showAtGameEnd = () => {
     return (
       <div>
-        <div>
-          {gameEndDeclaration}
+        <div className='mb-4'>
+          <span
+            className='inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-lg font-medium text-green-700 ring-1 ring-inset ring-green-600/20'>
+            {gameEndDeclaration}
+          </span>
         </div>
-        <button onClick={() => window.location.reload()}>reset</button>
+        <button
+          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg'
+          onClick={() => window.location.reload()}>reset</button>
       </div>
     )
   }
   return (
-    <div className='border-2 flex justify-center'>
+    <div>
       {gameEndDeclaration ? showAtGameEnd() : ""}
     </div>
   )
