@@ -19,7 +19,7 @@ export type WinCondition = {
 // this is the foundational game state
 export const initialGameState: Game = {
   currentPlayer: 'x',
-  cells: ['', '', '', '', '', '', '', '', ''],
+  cells: ['', '', '', 'x', '', '', '', '', ''],
   winCondition: {
     playerWon: null,
     result: null}
