@@ -4,7 +4,7 @@ export type Player = "x" | "o"
 export type CellIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 export type Board = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell]
 
-export interface Game {
+export type Game = {
   // this is 9 cells
   currentPlayer: Player
   cells: Board
