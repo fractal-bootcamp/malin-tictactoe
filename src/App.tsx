@@ -32,8 +32,8 @@ const CreateBoard = () => {
 
   return (
     <div>
-      <div className='text-xl mb-10'>It's Your Turn:
-        <span className='ml-2 inline-flex items-center rounded-md bg-yellow-50 px-3 pb-1 text-2xl font-medium text-yellow-800 ring-2 ring-inset ring-yellow-600/20'>
+      <div className='text-xl mb-10 flex items-center justify-center'>It's Your Turn:
+        <span className='ml-2 inline-flex items-center rounded-md bg-yellow-50 px-3 pb-1 text-3xl font-medium text-yellow-800 ring-2 ring-inset ring-yellow-600/20'>
           {`${game.currentPlayer}`}
         </span>
       </div>
@@ -50,7 +50,7 @@ const CreateBoard = () => {
           )
         })}
       </div>
-      <div className='mt-4'>
+      <div className='mt-8 flex justify-center'>
         <GameEndFooter gameEndDeclaration={gameEndDeclaration} />
       </div>
     </div >
@@ -84,9 +84,7 @@ function App() {
 
   // We're going to implement tic tac toe
   return (
-    <div>
-      <CreateBoard />
-    </div>
+    <CreateBoard />
   )
 }
 
