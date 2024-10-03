@@ -8,7 +8,6 @@ type GameEndProps = {
   gameEndDeclaration: GameEndDeclaration
 }
 
-
 const CreateBoard = () => {
   const [game, setGame] = useState(initialGameState)
   const [gameEndDeclaration, setGameEndDeclaration] = useState<GameEndDeclaration>(null)
