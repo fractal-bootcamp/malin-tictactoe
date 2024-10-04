@@ -14,8 +14,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               type="radio"
               name="theme-buttons"
               className="btn theme-controller join-item"
-              aria-label="Default"
-              value="default" />
+              aria-label="Coffee"
+              value="coffee" />
             <input
               type="radio"
               name="theme-buttons"
@@ -27,7 +27,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               name="theme-buttons"
               className="btn theme-controller join-item"
               aria-label="Cyberpunk"
-              value="cyberpunk" />
+              value="cyberpunk"
+            />
             <input
               type="radio"
               name="theme-buttons"
@@ -38,8 +39,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               type="radio"
               name="theme-buttons"
               className="btn theme-controller join-item"
-              aria-label="Aqua"
-              value="aqua" />
+              aria-label="Lemonade"
+              value="lemonade" />
           </div>
         </div>
       </header>
