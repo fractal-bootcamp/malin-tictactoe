@@ -61,7 +61,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       <footer className="bg-neutral text-neutral-content">
         <div className="container mx-auto px-4 py-4 text-center">
-          © {new Date().getFullYear()} mahlen. all rights reserved, i guess.
+          © {new Date().getFullYear()} .mahlen
         </div>
       </footer>
     </div>
