@@ -1,5 +1,7 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { io, Socket } from 'socket.io-client';
+const serverURL = import.meta.env.VITE_SERVER_URL
 
 const WelcomePage: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -7,6 +9,11 @@ const WelcomePage: React.FC = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (username) {
+      const socket = io(serverURL)
+      socket.emit("register-user", username)
+    }
+
     if (username.trim()) {
       navigate('/lobby', { state: { username } });
     }

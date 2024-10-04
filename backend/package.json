@@ -1,5 +1,1 @@
-{ "dependencies": { "@types/express": "^5.0.0", "express": "^4.21.0", "http": "^0.0.1-security", "react-router-dom": "^6.26.2", "socket.io": "^4.8.0" }, "name": "backend", "module": "index.ts", "type": "module", "devDependencies": {
-  "@types/bun": "latest"
-}, "peerDependencies": {
-  "typescript": "^5.0.0"
-} }
+{ "dependencies": { "@paralleldrive/cuid2": "^2.2.2", "@types/express": "^5.0.0", "express": "^4.21.0", "http": "^0.0.1-security", "react-router-dom": "^6.26.2", "socket.io": "^4.8.0" }, "name": "backend", "module": "index.ts", "type": "module", "devDependencies": { "@types/bun": "latest" }, "peerDependencies": { "typescript": "^5.0.0" } }

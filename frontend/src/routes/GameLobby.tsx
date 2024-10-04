@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { io, Socket } from 'socket.io-client';
 
 interface LocationState {
   username: string;
@@ -13,6 +14,9 @@ const GameLobby: React.FC = () => {
   const startGame = () => {
     navigate('/game', { state: { username } });
   };
+
+  // here we will need some information about what games are currently running
+  // probably an array that we can map over
 
   return (
     <div className="lobby-page flex bg-gray-100">

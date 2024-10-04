@@ -3,6 +3,7 @@ import { createServer } from "http"
 import express from 'express'
 const SERVER_URL = "http://localhost:3005"
 import { move, initialGameState } from './game'
+import { createId } from '@paralleldrive/cuid2';
 
 // create an express app
 const app = express();
@@ -17,6 +18,10 @@ const io = new Server(httpServer, {
 })
 
 let currentGameState = initialGameState;
+const users: Array<{
+  username: string,
+  cuid: string
+}> = [];
 
 
 // listen on the connection event for incoming sockets
@@ -26,6 +31,16 @@ io.on("connection", (socket) => {
   // socket.on on the backend means "create a listener for 'thing"
   socket.on("chat", (message) => {
     console.log(`${socket.id}: ${message}`)
+  })
+
+  socket.on("register-user", (userName) => {
+    console.log(`storing user ${userName} in memory`)
+    const newUser = {
+      username: userName,
+      cuid: createId()
+    }
+    users.push(newUser)
+    console.log(newUser)
   })
 
   // send initial game state to client
