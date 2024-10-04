@@ -1,13 +1,31 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
+import ReactDOM from 'react-dom/client'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import './index.css'
-import Layout from './Layout.tsx'
+// import Layout from './Layout.tsx'
 
-createRoot(document.getElementById('root')!).render(
+// Import the layouts
+import RootLayout from './layouts/root-layout.tsx'
+
+// Import the components
+import RenderGame from './routes/Game.tsx'
+import GameLobby from './routes/GameLobby.tsx'
+import WelcomePage from './routes/WelcomePage.tsx'
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      { index: true, element: <WelcomePage /> },
+      { path: "waiting-room", element: <GameLobby /> },
+      { path: "game", element: <RenderGame /> }
+    ]
+  }
+])
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Layout>
-      <App />
-    </Layout>
-  </StrictMode>,
+    <RouterProvider router={router} />
+  </StrictMode>
 )

@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef, SetStateAction } from 'react'
-import './App.css'
-import { Cell, Player, CellIndex, Board, Game, WinCondition } from '../game'
+import { useState, useEffect, useRef } from 'react'
+import '../App.css'
 import { io, Socket } from 'socket.io-client'
 // import { move, initialGameState } from '../game'
 const serverURL = 'http://localhost:3005'
@@ -8,6 +7,21 @@ type GameEndDeclaration = string | null;
 type GameEndProps = {
   gameEndDeclaration: GameEndDeclaration
   setGameEndDeclaration: React.Dispatch<React.SetStateAction<GameEndDeclaration>>
+}
+type Cell = "x" | "o" | ""
+type Player = "x" | "o"
+type CellIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
+type Board = [Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell, Cell]
+
+type Game = {
+  // this is 9 cells
+  currentPlayer: Player
+  cells: Board
+  winCondition: WinCondition
+}
+type WinCondition = {
+  playerWon: Player | null, //null if nobody won
+  result: 'win' | 'tie' | null // null if you should continue play
 }
 
 
@@ -143,7 +157,7 @@ const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndD
   )
 }
 
-function App() {
+export default function RenderGame() {
   const [userChat, setUserChat] = useState<string>("")
   const chatSocketRef = useRef<Socket | null>(null);
 
@@ -170,8 +184,5 @@ function App() {
     </div>
   )
 }
-
-export default App
-
 
 
