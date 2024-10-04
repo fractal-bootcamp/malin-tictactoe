@@ -53,7 +53,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </nav>
 
       <main className="flex-grow container mx-auto flex items-center justify-center">
-        <div className="max-w-4xl w-full -mt-36">
+        <div className="max-w-4xl w-full -mt-8">
           {children}
         </div>
       </main>

@@ -1,0 +1,5 @@
+{ "dependencies": { "@types/express": "^5.0.0", "express": "^4.21.0", "http": "^0.0.1-security", "socket.io": "^4.8.0" }, "name": "backend", "module": "index.ts", "type": "module", "devDependencies": {
+  "@types/bun": "latest"
+}, "peerDependencies": {
+  "typescript": "^5.0.0"
+} }
