@@ -13,19 +13,28 @@ const WelcomePage: React.FC = () => {
   };
 
   return (
-    <div className="welcome-page">
-      <h1>Welcome to the Game</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={username}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
-          placeholder="Enter your username"
-          required
-        />
-        <button type="submit">Enter Lobby</button>
-      </form>
+    <div className='flex items-center justify-center'>
+      <div className="welcome-page bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center mb-6">Pick a User Name</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            value={username}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+            placeholder="Enter your username"
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+          >
+            Enter Lobby
+          </button>
+        </form>
+      </div>
     </div>
+
   );
 };
 

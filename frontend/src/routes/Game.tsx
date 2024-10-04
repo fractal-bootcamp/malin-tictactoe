@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../App.css'
 import { io, Socket } from 'socket.io-client'
+
 // import { move, initialGameState } from '../game'
 const serverURL = 'http://localhost:3005'
 type GameEndDeclaration = string | null;
@@ -23,6 +25,7 @@ type WinCondition = {
   playerWon: Player | null, //null if nobody won
   result: 'win' | 'tie' | null // null if you should continue play
 }
+
 
 
 const CreateBoard: React.FC = () => {
@@ -141,9 +144,11 @@ const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndD
             {gameEndDeclaration}
           </span>
         </div>
-        <button
-          className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg'
-          onClick={handleReset}>reset</button>
+        <div className="flex justify-center">
+          <button
+            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg'
+            onClick={handleReset}>reset</button>
+        </div>
       </div>
     )
   }
@@ -160,6 +165,7 @@ const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndD
 export default function RenderGame() {
   const [userChat, setUserChat] = useState<string>("")
   const chatSocketRef = useRef<Socket | null>(null);
+  const navigate = useNavigate();
 
   const handleButtonClick = () => {
     chatSocketRef.current = io(serverURL);
@@ -168,11 +174,16 @@ export default function RenderGame() {
     setUserChat("")
   }
 
+  const handleBackToLobby = () => {
+    // Navigate back to the lobby
+    navigate('/lobby');
+  }
+
   // We're going to implement tic tac toe
   return (
     <div>
       <CreateBoard />
-      <div>
+      {/* <div>
         UserChat:
         <input
           value={userChat}
@@ -180,6 +191,14 @@ export default function RenderGame() {
           placeholder='Enter text...'
         />
         <button type="submit" onClick={handleButtonClick}>send</button>
+      </div> */}
+      <div className="mt-8 flex justify-center">
+        <button
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg"
+          onClick={handleBackToLobby}
+        >
+          Back to Lobby
+        </button>
       </div>
     </div>
   )

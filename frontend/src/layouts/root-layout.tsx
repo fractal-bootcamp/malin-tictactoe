@@ -2,12 +2,11 @@ import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Layout from '../Layout';
 
-const RootLayout = () => {
+const RootLayout: React.FC = () => {
   return (
     <Layout>
       <div className="app-container">
         <header className="app-header">
-          <h1>My Game App</h1>
           <nav>
             <ul>
               <li><Link to="/">Home</Link></li>
@@ -15,7 +14,6 @@ const RootLayout = () => {
             </ul>
           </nav>
         </header>
-
         <main className="app-main">
           <Outlet />
         </main>
