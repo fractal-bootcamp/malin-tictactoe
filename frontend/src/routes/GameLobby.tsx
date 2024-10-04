@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 
@@ -10,8 +10,39 @@ const GameLobby: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { username = 'Guest' } = (location.state as LocationState) || {};
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [games, setGames] = useState<string[]>([]);
+
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_SERVER_URL);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    newSocket.on('update-games', (updatedGames: string[]) => {
+      setGames(updatedGames);
+    });
+
+    newSocket.on('game-created', (gameId: string) => {
+      navigate(`/game/${gameId}`, { state: { username, gameId } });
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [navigate]); // This effect now only runs once
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit('join-lobby', username);
+    }
+  }, [socket, username]); // This effect runs when socket or username changes
+
 
   const startGame = () => {
+
     navigate('/game', { state: { username } });
   };
 

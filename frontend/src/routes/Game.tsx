@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../App.css'
 import { io, Socket } from 'socket.io-client'
+const serverURL = import.meta.env.VITE_SERVER_URL
 
 // import { move, initialGameState } from '../game'
-const serverURL = 'http://localhost:3005'
 type GameEndDeclaration = string | null;
 type GameEndProps = {
   gameEndDeclaration: GameEndDeclaration
@@ -25,8 +25,6 @@ type WinCondition = {
   playerWon: Player | null, //null if nobody won
   result: 'win' | 'tie' | null // null if you should continue play
 }
-
-
 
 const CreateBoard: React.FC = () => {
   const [game, setGame] = useState<Game | null>(null)
@@ -163,16 +161,7 @@ const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndD
 }
 
 export default function RenderGame() {
-  const [userChat, setUserChat] = useState<string>("")
-  const chatSocketRef = useRef<Socket | null>(null);
   const navigate = useNavigate();
-
-  const handleButtonClick = () => {
-    chatSocketRef.current = io(serverURL);
-    chatSocketRef.current?.emit("chat", userChat)
-    console.log(userChat)
-    setUserChat("")
-  }
 
   const handleBackToLobby = () => {
     // Navigate back to the lobby
