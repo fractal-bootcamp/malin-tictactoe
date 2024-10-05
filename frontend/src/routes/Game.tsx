@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom';
 import '../App.css'
 import { io, Socket } from 'socket.io-client'
+const serverURL = import.meta.env.VITE_SERVER_URL
 
 // import { move, initialGameState } from '../game'
-const serverURL = 'http://localhost:3005'
 type GameEndDeclaration = string | null;
 type GameEndProps = {
   gameEndDeclaration: GameEndDeclaration
@@ -26,13 +26,26 @@ type WinCondition = {
   result: 'win' | 'tie' | null // null if you should continue play
 }
 
+type UniqueGameData = {
+  id: string;
+  players: string[];
+  state: Game;
+}
 
+interface LocationState {
+  gameId: string;
+}
 
 const CreateBoard: React.FC = () => {
+  const location = useLocation();
   const [game, setGame] = useState<Game | null>(null)
   const [gameEndDeclaration, setGameEndDeclaration] = useState<GameEndDeclaration>(null)
   const socketRef = useRef<Socket | null>(null);
+  const [players, setPlayers] = useState<string[]>([])
+  const [isReady, setIsReady] = useState(false)
+  const { username, gameId } = location.state
 
+  console.log('state', username, gameId)
   // when the page loads we want to store the initial game state
   useEffect(() => {
     // Initialise the socket connection
@@ -41,6 +54,12 @@ const CreateBoard: React.FC = () => {
     socketRef.current.on("connect", () => {
       console.log("a player has arrived: ", socketRef.current?.id)
     })
+
+    socketRef.current.on("game-joined", (gameData: UniqueGameData) => {
+      setPlayers(gameData.players);
+      setGame(gameData.state);
+    });
+
     // listen for the initial game state
     socketRef.current.on("initial-game-state", (initialGameState: Game) => {
       setGame(initialGameState)
@@ -80,7 +99,7 @@ const CreateBoard: React.FC = () => {
       // we pass the position of the move
       // the server figures out what the new game state looks like and sends it back
       if (!gameEndDeclaration) {
-        socketRef.current?.emit('make-next-move', index)
+        socketRef.current?.emit('make-next-move', gameId, index)
       }
     }
   };
@@ -163,16 +182,7 @@ const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndD
 }
 
 export default function RenderGame() {
-  const [userChat, setUserChat] = useState<string>("")
-  const chatSocketRef = useRef<Socket | null>(null);
   const navigate = useNavigate();
-
-  const handleButtonClick = () => {
-    chatSocketRef.current = io(serverURL);
-    chatSocketRef.current?.emit("chat", userChat)
-    console.log(userChat)
-    setUserChat("")
-  }
 
   const handleBackToLobby = () => {
     // Navigate back to the lobby

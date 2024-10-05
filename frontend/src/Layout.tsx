@@ -48,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <nav className="bg-base-200">
         <div className="container mx-auto px-4 py-2">
           <ul className="menu menu-horizontal flex justify-center items-center">
-            <li><a className="btn btn-ghost text-2xl">Tic Tac Toe</a></li>
+            <li><a href="/" className="btn btn-ghost text-2xl">Tic Tac Toe</a></li>
           </ul>
         </div>
       </nav>
