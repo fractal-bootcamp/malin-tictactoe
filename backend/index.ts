@@ -20,7 +20,6 @@ const io = new Server(httpServer, {
 
 type User = {
   username: string;
-  socketId: string;
   cuid: string;
 }
 
@@ -32,17 +31,31 @@ type UniqueGameData = {
 
 
 let currentGameState = initialGameState;
-const users: User[] = [];
-const activeGames: UniqueGameData[] = []
+const users: User[] = [{username: "mahlen", cuid: "0000001k39"}];
+const activeGames: UniqueGameData[] = [{id: "24324",
+  players: ["playeA, plajB"],
+  state: {
+    // this is 9 cells
+    currentPlayer: "x",
+    cells: ['', '', '', '', '', '', '', '', ''],
+    winCondition: {
+      playerWon: null,
+      result: null}
+  }}]
+
+
 
 // listen on the connection event for incoming sockets
 io.on("connection", (socket) => {
   console.log("connection established with", socket.id)
+  // create
   
   // socket.on on the backend means "create a listener for 'thing"
   socket.on("chat", (message) => {
     console.log(`${socket.id}: ${message}`)
   })
+
+  socket.emit('logged-in-users', users.map(user => user.username))
 
   // sends a list of games to the user
   socket.on('join-lobby', () => {
@@ -56,50 +69,46 @@ io.on("connection", (socket) => {
     )
   });
 
-  socket.on("create-game", () => {
-    const user = users.find(u => u.socketId === socket.id);
-    if (user) {
-      const newGame: UniqueGameData = {
-        id: createId(),
-        players: [user.username],
-        state: initialGameState
-      };
-      activeGames.push(newGame);
-      socket.leave("lobby");
-      socket.join(newGame.id);
-      socket.emit("game-created", newGame.id);
-      io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
-    }
-  });
+  // socket.on("create-game", (username) => {
+  //   const user = users.find(u => u.socketId === socket.id);
+  //   if (user) {
+  //     const newGame: UniqueGameData = {
+  //       id: createId(),
+  //       players: [user.username],
+  //       state: initialGameState
+  //     };
+  //     activeGames.push(newGame);
+  //     socket.leave("lobby");
+  //     socket.join(newGame.id);
+  //     socket.emit("game-created", newGame.id);
+  //     io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
+  //   }
+  // });
 
-  socket.on("join-game", (gameId) => {
-    const game = activeGames.find(g => g.id === gameId);
-    const user = users.find(u => u.socketId === socket.id);
-    if (game && user && game.players.length < 2) {
-      game.players.push(user.username);
-      socket.leave("lobby");
-      socket.join(gameId);
-      io.to(gameId).emit("game-joined", game);
-      io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
-    }
-  });
+  // socket.on("join-game", (gameId) => {
+  //   const game = activeGames.find(g => g.id === gameId);
+  //   const user = users.find(u => u.socketId === socket.id);
+  //   if (game && user && game.players.length < 2) {
+  //     game.players.push(user.username);
+  //     socket.leave("lobby");
+  //     socket.join(gameId);
+  //     io.to(gameId).emit("game-joined", game);
+  //     io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
+  //   }
+  // });
 
   socket.on("register-user", (username) => {
-    console.log(`storing user ${username} in memory`)
-    const existingUser = users.find(user => user.username === username);
-    if (existingUser) {
-      existingUser.socketId = socket.id;
-    } else {
-      const newUser: User = {
-        username: username,
-        socketId: socket.id,
-        cuid: createId()
-      };
-      users.push(newUser);
-    }
-    socket.emit("user-registered", { username, cuid: users.find(u => u.socketId === socket.id)?.cuid });
-  });
-  
+    // whats the simplest thing we can do?
+    // take the username and store it in memory
+    const newUser: User = {
+      username: username,
+      cuid: createId()
+    };
+    console.log(`created new user: ${newUser.username} ${newUser.cuid}`)
+    users.push(newUser)
+    socket.emit("user-registered", newUser);
+    io.emit('logged-in-users', users.map(user => user.username));
+    });
 
   // send initial game state to client
   socket.emit("initial-game-state", (currentGameState))
@@ -120,10 +129,15 @@ io.on("connection", (socket) => {
     }
   });
 
-    currentGameState = move(currentGameState, index);
-    console.log(currentGameState)
-    io.emit('update-game-state', currentGameState)
-  })
+   // Handle player ready status
+   socket.on("player-ready", (gameId) => {
+    const game = activeGames.find(g => g.id === gameId);
+    const user = users.find(u => u.socketId === socket.id);
+    if (game && user) {
+      io.to(gameId).emit("player-ready", user.username);
+    }
+  });
+
 
   socket.on("reset", () => {
     console.log('recieved')
@@ -136,8 +150,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`${socket.id} disconnected`)
   })
-})
 
+})
+  
 httpServer.listen(3005, () => {
   console.log(`Server running on port http://localhost:3005`)
 })

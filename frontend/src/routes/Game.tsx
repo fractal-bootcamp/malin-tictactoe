@@ -39,6 +39,7 @@ const CreateBoard: React.FC = () => {
     socketRef.current.on("connect", () => {
       console.log("a player has arrived: ", socketRef.current?.id)
     })
+
     // listen for the initial game state
     socketRef.current.on("initial-game-state", (initialGameState: Game) => {
       setGame(initialGameState)
