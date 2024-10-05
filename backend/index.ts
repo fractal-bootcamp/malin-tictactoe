@@ -21,6 +21,7 @@ const io = new Server(httpServer, {
 type User = {
   username: string;
   cuid: string;
+  socketId: string
 }
 
 type UniqueGameData = {
@@ -31,7 +32,7 @@ type UniqueGameData = {
 
 
 let currentGameState = initialGameState;
-const users: User[] = [{username: "mahlen", cuid: "0000001k39"}];
+const users: User[] = [{username: "mahlen", cuid: "0000001k39", socketId: "001"}];
 const activeGames: UniqueGameData[] = [{id: "24324",
   players: ["playeA, plajB"],
   state: {
@@ -48,8 +49,7 @@ const activeGames: UniqueGameData[] = [{id: "24324",
 // listen on the connection event for incoming sockets
 io.on("connection", (socket) => {
   console.log("connection established with", socket.id)
-  // create
-  
+
   // socket.on on the backend means "create a listener for 'thing"
   socket.on("chat", (message) => {
     console.log(`${socket.id}: ${message}`)
@@ -69,6 +69,7 @@ io.on("connection", (socket) => {
     )
   });
 
+  // server creates a new game object for the user who sent the request
   socket.on("create-game", (username) => {
     console.log('recieved ', username)  
     const newGame: UniqueGameData = {
@@ -76,14 +77,29 @@ io.on("connection", (socket) => {
         players: [username],
         state: initialGameState
       };
+      // add this new game to the array of existing games
       activeGames.push(newGame);
       console.log(activeGames)
-      // put this socket into this room
-      socket.join(newGame.id);
-      console.log('created new room: ', newGame.id)
+      // // put this socket into this room
+      // socket.join(newGame.id);
+      // console.log('created new room: ', newGame.id)
       socket.emit("game-created", newGame.id);
       io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
   });
+
+  socket.on("test",(msg, next) => {
+    console.log(msg, next)
+  })
+  // how do i know what gameId to
+
+  socket.on("join-game", (userInformation) => {
+    console.log('msg from', userInformation)
+    socket.emit('test', `hey ${userInformation}`)
+    const newRoomName = `room-${activeGames.length + 1}`
+    socket.join(`${newRoomName}`)
+    console.log(`added ${userInformation} to ${newRoomName}`)
+    io.to(`${newRoomName}`).emit("room-info", newRoomName)
+  })
 
   // socket.on("join-game", (gameId) => {
   //   const game = activeGames.find(g => g.id === gameId);
@@ -102,14 +118,16 @@ io.on("connection", (socket) => {
     // take the username and store it in memory
     const newUser: User = {
       username: username,
-      cuid: createId()
+      cuid: createId(),
+      socketId: ''
     };
     console.log(`created new user: ${newUser.username} ${newUser.cuid}`)
     users.push(newUser)
     socket.emit("user-registered", newUser);
     io.emit('logged-in-users', users.map(user => user.username));
-    });
-
+  });
+  
+  
   // send initial game state to client
   socket.emit("initial-game-state", (currentGameState))
   // the only way that game state should change is if
