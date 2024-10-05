@@ -6,11 +6,7 @@ interface LocationState {
   username: string;
 }
 
-type User = {
-  username: string;
-  cuid: string;
-  socketId?: string;
-}
+type LoggedInUsers = string[]
 
 type GameMetaData = {
   id: string,
@@ -24,7 +20,7 @@ const GameLobby: React.FC = () => {
   const { username = 'Guest' } = (location.state as LocationState) || {};
   const [socket, setSocket] = useState<Socket | null>(null);
   const [gamesMetaData, setGamesMetaData] = useState<GameMetaData[]>([]);
-  const [loggedInUsers, setLogedInUsers] = useState<User[]>([])
+  const [loggedInUsers, setLogedInUsers] = useState<LoggedInUsers>([])
   const [newGameId, setNewGameId] = useState('')
 
   console.log('state', location.state)
@@ -37,6 +33,7 @@ const GameLobby: React.FC = () => {
       console.log('Connected to server');
 
       newSocket.on('logged-in-users', (currentUsers) => {
+        console.log('logged in users', currentUsers)
         setLogedInUsers(currentUsers)
       })
 
@@ -109,8 +106,8 @@ const GameLobby: React.FC = () => {
         <div>
           {/* Placeholder for current games list */}
           {loggedInUsers.map((user, index) => {
-            if (user.username) {
-              return (<li key={index} className="p-2 rounded">{user.username}</li>)
+            if (user) {
+              return (<li key={index} className="p-2 rounded">{user}</li>)
             }
           })}
         </div>
