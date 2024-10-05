@@ -76,8 +76,8 @@ const GameLobby: React.FC = () => {
   return (
     <div className="lobby-page flex bg-gray-100">
       {/* Left side: Welcome and Start Game */}
-      <div className="w-1/3 flex flex-col justify-center items-center">
-        <h1 className="text-3xl font-bold mb-4">Welcome, {username}!</h1>
+      <div className="w-1/3 flex flex-col justify-center items-center mx-12">
+        <h1 className="text-3xl font-bold mb-4 text-center">Welcome, {username}!</h1>
         <button
           className="btn border-2 border-gray-700 btn-primary btn-lg shadow-md hover:shadow-lg transition-all duration-200"
           onClick={startGame}
@@ -87,7 +87,7 @@ const GameLobby: React.FC = () => {
       </div>
 
       {/* Middle: Current Games */}
-      <div className="w-1/3 bg-white p-8 shadow-lg">
+      <div className="w-1/3 p-8 shadow-lg mx-8">
         <h2 className="text-2xl font-semibold mb-4">Current Games</h2>
         {/* Placeholder for current games list */}
         <div>
@@ -101,8 +101,8 @@ const GameLobby: React.FC = () => {
       </div>
 
       {/* Right side: Current Logged In Users */}
-      <div className="w-1/3 p-8 shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Players Logged In</h2>
+      <div className="w-1/3 p-8 shadow-lg mx-8">
+        <h2 className="text-2xl font-semibold mb-4">Players</h2>
         <div>
           {/* Placeholder for current games list */}
           {loggedInUsers.map((user, index) => {
