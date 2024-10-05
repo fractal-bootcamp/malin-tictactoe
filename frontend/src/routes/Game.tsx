@@ -46,8 +46,37 @@ const CreateBoard: React.FC = () => {
   const [isReady, setIsReady] = useState(false)
   const { username, gameId } = location.state
   const [roomName, setRoomName] = useState('');
+  // const socketRef = useRef<Socket | null>(null);
 
   console.log('state passed from previous page', username, gameId)
+
+  // when reset button is clicked do this:
+  // send socket request to server for game reset
+  // remove the game end declaration component and reset button
+
+  const handleReset = () => {
+    socketRef.current = io(serverURL);
+    socketRef.current?.emit("reset", gameId, roomName)
+    setGameEndDeclaration(null)
+  }
+
+  const showAtGameEnd = () => {
+    return (
+      <div>
+        <div className='mb-4'>
+          <span
+            className='inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-lg font-medium text-green-700 ring-1 ring-inset ring-green-600/20'>
+            {gameEndDeclaration}
+          </span>
+        </div>
+        <div className="flex justify-center">
+          <button
+            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg'
+            onClick={handleReset}>reset</button>
+        </div>
+      </div>
+    )
+  }
 
   // when the page loads we want to store the initial game state
   useEffect(() => {
@@ -57,16 +86,11 @@ const CreateBoard: React.FC = () => {
     socketRef.current.on("connect", () => {
       console.log('this socket is called', socketRef.current?.id)
       // // tell the server you have joined the game
-      socketRef.current?.emit("join-game", socketRef.current?.id)
+      socketRef.current?.emit("join-game", username, gameId, socketRef.current?.id)
       // putting this outide of the current.on connection does not work!
       socketRef.current?.on("room-info", (roomNumber) => {
         setRoomName(roomNumber);
       });
-    })
-
-
-    socketRef.current.on("test", (msg) => {
-      console.log(msg)
     })
     // setting a delay makes it work??
     // setTimeout(() => {
@@ -91,7 +115,6 @@ const CreateBoard: React.FC = () => {
       socketRef.current?.off("initial-game-state");
       socketRef.current?.off("game-state-update");
     }
-
   }, [])
 
   useEffect(() => {
@@ -112,7 +135,7 @@ const CreateBoard: React.FC = () => {
       // we pass the position of the move
       // the server figures out what the new game state looks like and sends it back
       if (!gameEndDeclaration) {
-        socketRef.current?.emit('make-next-move', gameId, index)
+        socketRef.current?.emit('make-next-move', gameId, index, username)
       }
     }
   };
@@ -149,10 +172,11 @@ const CreateBoard: React.FC = () => {
           })}
         </div>
         <div className='mt-8 flex justify-center'>
-          <GameEndFooter
-            gameEndDeclaration={gameEndDeclaration}
-            setGameEndDeclaration={setGameEndDeclaration}
-          />
+          <div>
+            {gameEndDeclaration ?
+              showAtGameEnd() :
+              ""}
+          </div>
         </div>
       </div >
     </div>
@@ -160,43 +184,11 @@ const CreateBoard: React.FC = () => {
   )
 }
 
-const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndDeclaration }) => {
-  const socketRef = useRef<Socket | null>(null);
-  // when reset button is clicked do this:
-  // send socket request to server for game reset
-  // remove the game end declaration component and reset button
-  const handleReset = () => {
-    socketRef.current = io(serverURL);
-    socketRef.current?.emit("reset")
-    setGameEndDeclaration(null)
-  }
+// const GameEndFooter: React.FC<GameEndProps> = ({ gameEndDeclaration, setGameEndDeclaration }) => {
 
-  const showAtGameEnd = () => {
-    return (
-      <div>
-        <div className='mb-4'>
-          <span
-            className='inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-lg font-medium text-green-700 ring-1 ring-inset ring-green-600/20'>
-            {gameEndDeclaration}
-          </span>
-        </div>
-        <div className="flex justify-center">
-          <button
-            className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg'
-            onClick={handleReset}>reset</button>
-        </div>
-      </div>
-    )
-  }
 
-  return (
-    <div>
-      {gameEndDeclaration ?
-        showAtGameEnd() :
-        ""}
-    </div>
-  )
-}
+
+// }
 
 export default function RenderGame() {
   const navigate = useNavigate();
@@ -210,15 +202,6 @@ export default function RenderGame() {
   return (
     <div>
       <CreateBoard />
-      {/* <div>
-        UserChat:
-        <input
-          value={userChat}
-          onChange={(e) => setUserChat(e.target.value)}
-          placeholder='Enter text...'
-        />
-        <button type="submit" onClick={handleButtonClick}>send</button>
-      </div> */}
       <div className="mt-8 flex justify-center">
         <button
           className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg"

@@ -11,7 +11,6 @@ const WelcomePage: React.FC = () => {
     e.preventDefault();
     if (username) {
       const socket = io(serverURL)
-      console.log(`this socket is called`, socket)
       socket.emit("register-user", username)
     }
 
