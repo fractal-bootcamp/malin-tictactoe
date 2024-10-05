@@ -26,7 +26,6 @@ const GameLobby: React.FC = () => {
     });
 
     newSocket.on('logged-in-users', (currentUsers) => {
-      console.log('current users', currentUsers)
       setUsers(currentUsers)
     })
 

@@ -4,7 +4,7 @@ import express from 'express'
 const SERVER_URL = "http://localhost:3005"
 import { move, initialGameState } from './game'
 import type { Game } from './game'
-import { createId } from '@paralleldrive/cuid2';
+import { createId, init } from '@paralleldrive/cuid2';
 
 // create an express app
 const app = express();
@@ -21,19 +21,23 @@ const io = new Server(httpServer, {
 type User = {
   username: string;
   cuid: string;
-  socketId: string
+  socketId?: string;
 }
 
 type UniqueGameData = {
   id: string;
+  roomName: string;
   players: string[];
   state: Game;
 }
 
 
 let currentGameState = initialGameState;
+
 const users: User[] = [{username: "mahlen", cuid: "0000001k39", socketId: "001"}];
-const activeGames: UniqueGameData[] = [{id: "24324",
+const activeGames: UniqueGameData[] = [
+  {id: "24324",
+  roomName: '',
   players: ["playeA, plajB"],
   state: {
     // this is 9 cells
@@ -41,7 +45,7 @@ const activeGames: UniqueGameData[] = [{id: "24324",
     cells: ['', '', '', '', '', '', '', '', ''],
     winCondition: {
       playerWon: null,
-      result: null}
+      result: null},
   }}]
 
 
@@ -72,8 +76,10 @@ io.on("connection", (socket) => {
   // server creates a new game object for the user who sent the request
   socket.on("create-game", (username) => {
     console.log('recieved ', username)  
+    const createRoomName = `room-${activeGames.length + 1}`
     const newGame: UniqueGameData = {
         id: createId(),
+        roomName: createRoomName,
         players: [username],
         state: initialGameState
       };
@@ -92,13 +98,19 @@ io.on("connection", (socket) => {
   })
   // how do i know what gameId to
 
-  socket.on("join-game", (userInformation) => {
-    console.log('msg from', userInformation)
-    socket.emit('test', `hey ${userInformation}`)
-    const newRoomName = `room-${activeGames.length + 1}`
-    socket.join(`${newRoomName}`)
-    console.log(`added ${userInformation} to ${newRoomName}`)
-    io.to(`${newRoomName}`).emit("room-info", newRoomName)
+  socket.on("join-game", (username, gameId, socketId) => {
+    // check that the username is in the Game that we want to serve up
+    // if you give me the id of the game you want to join, i will add you to that room
+    const getGameOfRoom = activeGames.find(game => game.id === gameId)
+    // if gameId does not exist, terminate
+    if (!getGameOfRoom) {
+      return
+    };
+    // create a socket room with the name of the game
+    const roomName = getGameOfRoom.roomName;
+    socket.join(roomName)
+    console.log(`added ${username} to ${roomName}`)
+    io.to(roomName).emit("room-info", roomName)
   })
 
   // socket.on("join-game", (gameId) => {
@@ -133,17 +145,18 @@ io.on("connection", (socket) => {
   // the only way that game state should change is if
   // a user clicks a button
   // or clicks reset or refreshes their browser
-  socket.on("make-next-move", (gameId, index) => {
-    // acuurately passing the person that took the move
-    console.log(`new move by ${currentGameState.currentPlayer}:\n`)
+  socket.on("make-next-move", (gameId, index, username) => {
+    const currentGame = activeGames.find(game => game.id === gameId);
+    if (currentGame) {
+      // acuurately passing the person that took the move
+    console.log(`new move by ${username}:`)
     // console log is accurately passing the index clicked
     console.log(`at position ${index}`)
     // move is accurately returning the position clicked but is not performing
     // the move command
-    const game = activeGames.find(g => g.id === gameId);
-    if (game) {
-      game.state = move(game.state, index);
-      io.to(gameId).emit('update-game-state', game.state);
+    currentGame.state = move(currentGame.state, index);
+    io.to(currentGame.roomName).emit('update-game-state', currentGame.state);
+    console.log(`game board: ${currentGame?.state.cells}`)
     }
   });
 
@@ -157,10 +170,13 @@ io.on("connection", (socket) => {
   // });
 
 
-  socket.on("reset", () => {
-    console.log('recieved')
-    currentGameState = initialGameState
-    io.emit("initial-game-state", (initialGameState))
+  socket.on("reset", (gameId, roomName) => {
+    console.log(`reset recieved from ${gameId}`, roomName)
+    const currentGame = activeGames.find(game => game.id === gameId);
+    if (currentGame) {
+      currentGame.state = initialGameState
+      io.to(roomName).emit('initial-game-state', initialGameState);
+    }
   })
 
   // this is a default disconnet listener for any time the client disconnects
