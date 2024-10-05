@@ -34,11 +34,11 @@ type UniqueGameData = {
 
 let currentGameState = initialGameState;
 
-const users: User[] = [{username: "mahlen", cuid: "0000001k39", socketId: "001"}];
+const users: User[] = [{username: "", cuid: "", socketId: ""}];
 const activeGames: UniqueGameData[] = [
-  {id: "24324",
+  {id: "",
   roomName: '',
-  players: ["playeA, plajB"],
+  players: ["", ""],
   state: {
     // this is 9 cells
     currentPlayer: "x",
@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
     // send a message to all sockets in the lobby that are listening on 'update-games'
     io.to('lobby').emit('update-games', 
       // return an object literal implictly
-      activeGames.map(game => ({ id: game.id, players: game.players}))
+      activeGames.map(game => ({ id: game.id, players: game.players, roomName: game.roomName}))
     )
   });
 
@@ -93,9 +93,6 @@ io.on("connection", (socket) => {
       io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
   });
 
-  socket.on("test",(msg, next) => {
-    console.log(msg, next)
-  })
   // how do i know what gameId to
 
   socket.on("join-game", (username, gameId, socketId) => {
@@ -112,18 +109,6 @@ io.on("connection", (socket) => {
     console.log(`added ${username} to ${roomName}`)
     io.to(roomName).emit("room-info", roomName)
   })
-
-  // socket.on("join-game", (gameId) => {
-  //   const game = activeGames.find(g => g.id === gameId);
-  //   const user = users.find(u => u.socketId === socket.id);
-  //   if (game && user && game.players.length < 2) {
-  //     game.players.push(user.username);
-  //     socket.leave("lobby");
-  //     socket.join(gameId);
-  //     io.to(gameId).emit("game-joined", game);
-  //     io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
-  //   }
-  // });
 
   socket.on("register-user", (username) => {
     // whats the simplest thing we can do?

@@ -6,13 +6,25 @@ interface LocationState {
   username: string;
 }
 
+type User = {
+  username: string;
+  cuid: string;
+  socketId?: string;
+}
+
+type GameMetaData = {
+  id: string,
+  players: string[],
+  roomName: string
+}
+
 const GameLobby: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { username = 'Guest' } = (location.state as LocationState) || {};
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [games, setGames] = useState<string[]>([]);
-  const [users, setUsers] = useState<string[]>([])
+  const [gamesMetaData, setGamesMetaData] = useState<GameMetaData[]>([]);
+  const [loggedInUsers, setLogedInUsers] = useState<User[]>([])
   const [newGameId, setNewGameId] = useState('')
 
   console.log('state', location.state)
@@ -23,18 +35,20 @@ const GameLobby: React.FC = () => {
 
     newSocket.on('connect', () => {
       console.log('Connected to server');
-    });
 
-    newSocket.on('logged-in-users', (currentUsers) => {
-      setUsers(currentUsers)
-    })
+      newSocket.on('logged-in-users', (currentUsers) => {
+        setLogedInUsers(currentUsers)
+      })
 
-    newSocket.on('update-games', (updatedGames: string[]) => {
-      setGames(updatedGames);
-    });
+      newSocket.on('update-games', (allGamesMetadata: GameMetaData[]) => {
+        console.log('Received games metadata:', allGamesMetadata);
+        setGamesMetaData(allGamesMetadata);
+      });
 
-    newSocket.on('game-created', (gameId: string) => {
-      navigate(`/game/${gameId}`, { state: { username, gameId } });
+      newSocket.on('game-created', (gameId: string) => {
+        navigate(`/game/${gameId}`, { state: { username, gameId } });
+      });
+
     });
 
     return () => {
@@ -75,25 +89,29 @@ const GameLobby: React.FC = () => {
         </button>
       </div>
 
-      {/* Right side: Current Games */}
+      {/* Middle: Current Games */}
       <div className="w-1/3 bg-white p-8 shadow-lg">
         <h2 className="text-2xl font-semibold mb-4">Current Games</h2>
         {/* Placeholder for current games list */}
-        <ul className="space-y-2">
-          <li className="p-2 bg-gray-50 rounded-full">Game 1</li>
-          <li className="p-2 bg-gray-50 rounded-full">Game 2</li>
-          <li className="p-2 bg-gray-50 rounded-full">Game 3</li>
-          {/* Add more game items as needed */}
-        </ul>
+        <div>
+          {/* Placeholder for current games list */}
+          {gamesMetaData.map((games, index) => {
+            if (games.id) {
+              return (<li key={index} className="p-2 rounded">{games.roomName}</li>)
+            }
+          })}
+        </div>
       </div>
 
-      {/* Right side: Current Games */}
+      {/* Right side: Current Logged In Users */}
       <div className="w-1/3 p-8 shadow-lg">
         <h2 className="text-2xl font-semibold mb-4">Players Logged In</h2>
         <div>
           {/* Placeholder for current games list */}
-          {users.map((user, index) => {
-            return (<li key={index} className="p-2 rounded">{user}</li>)
+          {loggedInUsers.map((user, index) => {
+            if (user.username) {
+              return (<li key={index} className="p-2 rounded">{user.username}</li>)
+            }
           })}
         </div>
       </div>
