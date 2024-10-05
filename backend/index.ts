@@ -69,21 +69,21 @@ io.on("connection", (socket) => {
     )
   });
 
-  // socket.on("create-game", (username) => {
-  //   const user = users.find(u => u.socketId === socket.id);
-  //   if (user) {
-  //     const newGame: UniqueGameData = {
-  //       id: createId(),
-  //       players: [user.username],
-  //       state: initialGameState
-  //     };
-  //     activeGames.push(newGame);
-  //     socket.leave("lobby");
-  //     socket.join(newGame.id);
-  //     socket.emit("game-created", newGame.id);
-  //     io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
-  //   }
-  // });
+  socket.on("create-game", (username) => {
+    console.log('recieved ', username)  
+    const newGame: UniqueGameData = {
+        id: createId(),
+        players: [username],
+        state: initialGameState
+      };
+      activeGames.push(newGame);
+      console.log(activeGames)
+      // put this socket into this room
+      socket.join(newGame.id);
+      console.log('created new room: ', newGame.id)
+      socket.emit("game-created", newGame.id);
+      io.to("lobby").emit("update-games", activeGames.map(game => ({ id: game.id, players: game.players })));
+  });
 
   // socket.on("join-game", (gameId) => {
   //   const game = activeGames.find(g => g.id === gameId);
@@ -129,14 +129,14 @@ io.on("connection", (socket) => {
     }
   });
 
-   // Handle player ready status
-   socket.on("player-ready", (gameId) => {
-    const game = activeGames.find(g => g.id === gameId);
-    const user = users.find(u => u.socketId === socket.id);
-    if (game && user) {
-      io.to(gameId).emit("player-ready", user.username);
-    }
-  });
+  //  // Handle player ready status
+  //  socket.on("player-ready", (gameId) => {
+  //   const game = activeGames.find(g => g.id === gameId);
+  //   const user = users.find(u => u.socketId === socket.id);
+  //   if (game && user) {
+  //     io.to(gameId).emit("player-ready", user.username);
+  //   }
+  // });
 
 
   socket.on("reset", () => {

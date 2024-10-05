@@ -13,6 +13,9 @@ const GameLobby: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [games, setGames] = useState<string[]>([]);
   const [users, setUsers] = useState<string[]>([])
+  const [newGameId, setNewGameId] = useState('')
+
+  console.log('state', location.state)
 
   useEffect(() => {
     const newSocket = io(import.meta.env.VITE_SERVER_URL);
@@ -47,12 +50,14 @@ const GameLobby: React.FC = () => {
   }, [socket, username]); // This effect runs when socket or username changes
 
 
-  const startGame = () => {
-    const newSocket = io(import.meta.env.VITE_SERVER_URL);
-    const newGameId = ""
+  const startGame = () => { // keep this function simple just try to create a new game and access the gameId in the next page
+    const newSocket = io(import.meta.env.VITE_SERVER_URL)
     newSocket.emit('create-game', (username))
-
-    navigate('/game', { state: { username, newGameId } });
+    newSocket.on('game-created', (gameId) => {
+      console.log(gameId)
+      setNewGameId(gameId);
+      navigate('/game', { state: { username: username, gameId: gameId } });
+    })
   };
 
   // here we will need some information about what games are currently running
@@ -76,25 +81,22 @@ const GameLobby: React.FC = () => {
         <h2 className="text-2xl font-semibold mb-4">Current Games</h2>
         {/* Placeholder for current games list */}
         <ul className="space-y-2">
-          <li className="p-2 bg-gray-50 rounded">Game 1</li>
-          <li className="p-2 bg-gray-50 rounded">Game 2</li>
-          <li className="p-2 bg-gray-50 rounded">Game 3</li>
+          <li className="p-2 bg-gray-50 rounded-full">Game 1</li>
+          <li className="p-2 bg-gray-50 rounded-full">Game 2</li>
+          <li className="p-2 bg-gray-50 rounded-full">Game 3</li>
           {/* Add more game items as needed */}
         </ul>
       </div>
 
       {/* Right side: Current Games */}
-      <div className="w-1/3 bg-white p-8 shadow-lg">
+      <div className="w-1/3 p-8 shadow-lg">
         <h2 className="text-2xl font-semibold mb-4">Players Logged In</h2>
-        {/* Placeholder for current games list */}
-        {users.map((user, index) => (
-          <li key={index} className="p-2 bg-gray-50 rounded">{user}</li>
-        ))}
-        <ul className="space-y-2">
-          <li className="p-2 bg-gray-50 rounded">Game 1</li>
-          <li className="p-2 bg-gray-50 rounded">Game 2</li>
-          <li className="p-2 bg-gray-50 rounded">Game 3</li>
-        </ul>
+        <div>
+          {/* Placeholder for current games list */}
+          {users.map((user, index) => {
+            return (<li key={index} className="p-2 rounded">{user}</li>)
+          })}
+        </div>
       </div>
 
     </div>
