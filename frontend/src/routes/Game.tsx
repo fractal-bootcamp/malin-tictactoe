@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import '../App.css'
 import { io, Socket } from 'socket.io-client'
 const serverURL = import.meta.env.VITE_SERVER_URL
+console.log(serverURL)
 
 // import { move, initialGameState } from '../game'
 type GameEndDeclaration = string | null;
@@ -44,21 +45,33 @@ const CreateBoard: React.FC = () => {
   const [players, setPlayers] = useState<string[]>([])
   const [isReady, setIsReady] = useState(false)
   const { username, gameId } = location.state
+  const [roomName, setRoomName] = useState('');
 
-  console.log('state', username, gameId)
+  console.log('state passed from previous page', username, gameId)
+
   // when the page loads we want to store the initial game state
   useEffect(() => {
     // Initialise the socket connection
     socketRef.current = io(serverURL);
     // check connection
     socketRef.current.on("connect", () => {
-      console.log("a player has arrived: ", socketRef.current?.id)
+      console.log('this socket is called', socketRef.current?.id)
+      // // tell the server you have joined the game
+      socketRef.current?.emit("join-game", socketRef.current?.id)
+      // putting this outide of the current.on connection does not work!
+      socketRef.current?.on("room-info", (roomNumber) => {
+        setRoomName(roomNumber);
+      });
     })
 
-    socketRef.current.on("game-joined", (gameData: UniqueGameData) => {
-      setPlayers(gameData.players);
-      setGame(gameData.state);
-    });
+
+    socketRef.current.on("test", (msg) => {
+      console.log(msg)
+    })
+    // setting a delay makes it work??
+    // setTimeout(() => {
+    //   socketRef.current?.emit("test", "this is a message from ", socketRef.current?.id);
+    // }, 100);
 
     // listen for the initial game state
     socketRef.current.on("initial-game-state", (initialGameState: Game) => {
@@ -109,37 +122,41 @@ const CreateBoard: React.FC = () => {
   }
 
   return (
-    <div>
-      {/* This section disappears when the game ends */}
-      {gameEndDeclaration ?
-        (<div className='text-xl mb-10 flex items-center justify-center'></div>)
-        : (
-          <div className='text-xl mb-10 flex items-center justify-center'>It's Your Turn:
-            <span className='ml-2 inline-flex items-center rounded-md bg-yellow-50 px-3 pb-1 text-3xl font-medium text-yellow-800 ring-2 ring-inset ring-yellow-600/20'>
-              {`${game.currentPlayer}`}
-            </span>
-          </div>
-        )}
-      <div className='container mx-auto grid grid-cols-3 grid-rows-3 gap-2 w-64 h-64'>
-        {game.cells.map((cell, index) => {
-          return (
-            <div
-              key={index}
-              className={`bg-gray-200 flex items-center justify-center text-4xl font-bold ${gameEndDeclaration ? 'cursor-not-allowed' : 'cursor-pointer'} hover:bg-gray-300 transition-colors duration-200 rounded-lg}`}
-              onClick={handleOnClick(index as CellIndex)}
-            >
-              {cell}
+    <div className='flex flex-col justify-center items-center'>
+      <header className='text-3xl mt-24'>{roomName}</header>
+      <div className='mt-16'>
+        {/* This section disappears when the game ends */}
+        {gameEndDeclaration ?
+          (<div className='text-xl mb-10 flex items-center justify-center'></div>)
+          : (
+            <div className='text-xl mb-10 flex items-center justify-center'>It's Your Turn:
+              <span className='ml-2 inline-flex items-center rounded-md bg-yellow-50 px-3 pb-1 text-3xl font-medium text-yellow-800 ring-2 ring-inset ring-yellow-600/20'>
+                {`${game.currentPlayer}`}
+              </span>
             </div>
-          )
-        })}
-      </div>
-      <div className='mt-8 flex justify-center'>
-        <GameEndFooter
-          gameEndDeclaration={gameEndDeclaration}
-          setGameEndDeclaration={setGameEndDeclaration}
-        />
-      </div>
-    </div >
+          )}
+        <div className='container mx-auto grid grid-cols-3 grid-rows-3 gap-2 w-64 h-64'>
+          {game.cells.map((cell, index) => {
+            return (
+              <div
+                key={index}
+                className={`bg-gray-200 flex items-center justify-center text-4xl font-bold ${gameEndDeclaration ? 'cursor-not-allowed' : 'cursor-pointer'} hover:bg-gray-300 transition-colors duration-200 rounded-lg}`}
+                onClick={handleOnClick(index as CellIndex)}
+              >
+                {cell}
+              </div>
+            )
+          })}
+        </div>
+        <div className='mt-8 flex justify-center'>
+          <GameEndFooter
+            gameEndDeclaration={gameEndDeclaration}
+            setGameEndDeclaration={setGameEndDeclaration}
+          />
+        </div>
+      </div >
+    </div>
+
   )
 }
 
